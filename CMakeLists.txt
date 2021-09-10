@@ -15,7 +15,11 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network Concurrent Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Concurrent Quick REQUIRED)
 
 set(PROJECT_SOURCES
-        main.cpp
+        src/main.cpp
+        src/kijangclient.h src/kijangclient.cpp
+        src/output/pilandukaudiooutput.h src/output/pilandukaudiooutput.cpp
+        src/output/pilandukvideooutput.h src/output/pilandukvideooutput.cpp
+        src/input/kijangmotioninput.h src/input/kijangmotioninput.cpp
         qml.qrc
 )
 
