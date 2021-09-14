@@ -16,7 +16,8 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Concurrent Quick REQU
 
 set(PROJECT_SOURCES
         src/main.cpp
-        src/kijangclient.h src/kijangclient.cpp
+        src/network/kijangclient.h src/network/kijangclient.cpp
+        src/network/kijangprotocol.h src/network/kijangprotocol.cpp
         src/output/pilandukaudiooutput.h src/output/pilandukaudiooutput.cpp
         src/output/pilandukvideooutput.h src/output/pilandukvideooutput.cpp
         src/input/kijangmotioninput.h src/input/kijangmotioninput.cpp
