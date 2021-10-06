@@ -1,20 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include "network/kijangprotocol.h"
+#include "application/pilanduk.h"
+#include "application/pilanduklogger.h"
 
 int main(int argc, char *argv[])
 {
-    qRegisterMetaType<KijangProtocol>();
-
-    QGuiApplication app(argc, argv);
-    QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
-    engine.load(url);
-
-    return app.exec();
+    Pilanduk pilanduk;
+    int response = pilanduk.run(argc, argv);
+    qDebug() << "Response code: " << response;
+    PilandukLogger::flush();
+    return response;
 }

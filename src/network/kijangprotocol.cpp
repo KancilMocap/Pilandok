@@ -70,18 +70,11 @@ KijangProtocol::KijangProtocol(QByteArray array)
     m_packetCount = qFromBigEndian<qint32>(packet);
     array.remove(0, 4);
 
-    m_data = array;
+    QByteArray currentPacket = array.left(4);
+    m_currentPacket = qFromBigEndian<qint32>(packet);
+    array.remove(0,4);
 
-    // Module == 7FFF (client control), Code == 0001 (Client ID provisioning)
-    if (m_module == 32767 && m_code == 1) {
-        if (m_clientID) {
-            m_errorString = QString("Attempting to request client ID even though client ID (%1) already exists").arg(m_clientID);
-            m_exceptionInfo = KijangProtocol::ExceptionInfo::CLIENT_ID_EXISTS;
-        } else {
-            QRandomGenerator random;
-            m_clientID = random.generate();
-        }
-    }
+    m_data = array;
     // Module and code can be 0000, client ID, request ID and packet count cannot
     if (!m_clientID || !m_requestID || !m_packetCount) {
         m_exceptionInfo = KijangProtocol::ExceptionInfo::READING_FAILED;
@@ -94,6 +87,16 @@ KijangProtocol::KijangProtocol(QByteArray array)
 KijangProtocol::~KijangProtocol()
 {
 
+}
+
+quint32 KijangProtocol::currentPacket() const
+{
+    return m_currentPacket;
+}
+
+void KijangProtocol::setCurrentPacket(quint32 newCurrentPacket)
+{
+    m_currentPacket = newCurrentPacket;
 }
 
 KijangProtocol::ExceptionInfo KijangProtocol::exceptionInfo() const
