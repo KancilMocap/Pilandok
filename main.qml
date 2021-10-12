@@ -2,23 +2,21 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtMultimedia
 
 Window {
-    width: 640
-    height: 480
-
-    maximumWidth: 640
-    maximumHeight: 480
-
-    minimumWidth: 640
-    minimumHeight: 480
+    width: 720
+    height: 360
 
     visible: true
     title: qsTr("Pilanduk")
 
     ColumnLayout {
-        width: parent.width
-        height: parent.height
+        anchors.fill: parent
+        width: parent.width - 20
+        anchors.topMargin: 10
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
 
         RowLayout {
             width: parent.width
@@ -52,26 +50,55 @@ Window {
             }
         }
 
-        CheckBox {
-            enabled: !(kijangClient.connected || kijangClient.attemptingConnection)
-            id: allowLocalWebcam
-            objectName: "allowLocalWebcam"
-            text: qsTr("Allow use of webcam")
-            onClicked: pilandukOutputManager.allowLocalWebcam = checked
-            Component.onCompleted: checked = pilandukOutputManager.allowLocalWebcam
-            onStateChanged: allowLocalWebcam.checked = pilandukOutputManager.allowLocalWebcam
+        RowLayout {
+            id: cameraRow
+            width: parent.width
+            CheckBox {
+                enabled: !(kijangClient.connected || kijangClient.attemptingConnection)
+                id: allowLocalWebcam
+                objectName: "allowLocalWebcam"
+                text: qsTr("Allow use of webcam")
+                onClicked: pilandukOutputManager.allowLocalWebcam = checked
+                Component.onCompleted: checked = pilandukOutputManager.allowLocalWebcam
+                onStateChanged: allowLocalWebcam.checked = pilandukOutputManager.allowLocalWebcam
+            }
+
+            MediaDevices { id: mediaDevices }
+
+            ComboBox {
+                id: currentCamera
+                enabled: allowLocalWebcam.checked && allowLocalWebcam.enabled
+                model: mediaDevices.videoInputs
+                displayText: typeof currentValue === 'undefined' ? "Unavailable" : currentValue.description
+                textRole: "description"
+            }
+
+            ComboBox {
+                id: currentMic
+                enabled: allowLocalWebcam.checked && allowLocalWebcam.enabled
+                model: mediaDevices.audioInputs
+                textRole: "description"
+                displayText: typeof currentValue === 'undefined' ? "unavailable" : currentValue.description
+            }
         }
 
-        Button {
-            enabled: !kijangClient.attemptingConnection
-            id: connectButton
-            text: kijangClient.buttonString
-            onClicked: kijangClient.toggleConnection()
+        RowLayout {
+            Button {
+                enabled: !kijangClient.attemptingConnection
+                id: connectButton
+                text: kijangClient.buttonString
+                onClicked: kijangClient.toggleConnection()
+            }
+
+            Button {
+                text: "Open logs file"
+                onClicked: pilandukLogsUI.openLogsFile()
+            }
         }
 
         ScrollView {
             Layout.fillHeight: true
-            width: parent.width
+            Layout.fillWidth: true
             Text {
                 text: pilandukLogsUI.logString
             }

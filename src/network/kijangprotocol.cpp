@@ -3,6 +3,7 @@
 KijangProtocol::KijangProtocol()
 {
     QRandomGenerator random;
+    m_version = 1;
     m_clientID = 0;
     m_requestID = random.generate64();
     m_module = 0;
@@ -14,6 +15,7 @@ KijangProtocol::KijangProtocol()
 KijangProtocol::KijangProtocol(quint32 client)
 {
     QRandomGenerator random;
+    m_version = 1;
     m_clientID = client;
     m_requestID = random.generate64();
     m_module = 0;
@@ -22,20 +24,24 @@ KijangProtocol::KijangProtocol(quint32 client)
     m_exceptionInfo = KijangProtocol::ExceptionInfo::NONE;
 }
 
-KijangProtocol::KijangProtocol(quint32 client, quint64 request)
+KijangProtocol::KijangProtocol(quint32 client, quint16 module)
 {
+    QRandomGenerator random;
+    m_version = 1;
     m_clientID = client;
-    m_requestID = request;
+    m_requestID = random.generate64();
     m_module = 0;
     m_code = 0;
     m_packetCount = 1;
     m_exceptionInfo = KijangProtocol::ExceptionInfo::NONE;
 }
 
-KijangProtocol::KijangProtocol(quint32 client, quint64 request, quint16 module, quint16 code)
+KijangProtocol::KijangProtocol(quint32 client, quint16 module, quint16 code)
 {
+    QRandomGenerator random;
+    m_version = 1;
     m_clientID = client;
-    m_requestID = request;
+    m_requestID = random.generate64();
     m_module = module;
     m_code = code;
     m_packetCount = 1;
@@ -46,35 +52,56 @@ KijangProtocol::KijangProtocol(QByteArray array)
 {
     if (array.length() < 20) {
         m_exceptionInfo = KijangProtocol::ExceptionInfo::INVALID_LENGTH;
-        m_errorString = QString("Minimum length 20 expected for Kijang request but length %1 received").arg(array.length());
+        m_errorString = QString("Minimum length 28 expected for basic Kijang request but length %1 received").arg(array.length());
         return;
     }
 
+    QByteArray version = array.left(4);
+    m_version = qFromBigEndian<quint32>(version);
+    array.remove(0, 4);
+
     QByteArray module = array.left(2);
-    m_module = qFromBigEndian<qint16>(module);
+    m_module = qFromBigEndian<quint16>(module);
     array.remove(0, 2);
 
     QByteArray code = array.left(2);
-    m_code = qFromBigEndian<qint16>(code);
+    m_code = qFromBigEndian<quint16>(code);
     array.remove(0, 2);
 
     QByteArray client = array.left(4);
-    m_clientID = qFromBigEndian<qint32>(client);
+    m_clientID = qFromBigEndian<quint32>(client);
     array.remove(0, 4);
 
     QByteArray request = array.left(8);
-    m_requestID = qFromBigEndian<qint64>(request);
+    m_requestID = qFromBigEndian<quint64>(request);
     array.remove(0, 8);
 
     QByteArray packet = array.left(4);
-    m_packetCount = qFromBigEndian<qint32>(packet);
+    m_packetCount = qFromBigEndian<quint32>(packet);
     array.remove(0, 4);
 
     QByteArray currentPacket = array.left(4);
-    m_currentPacket = qFromBigEndian<qint32>(packet);
+    m_currentPacket = qFromBigEndian<quint32>(currentPacket);
     array.remove(0,4);
 
-    m_data = array;
+    if (m_version == 1) {
+        m_data = array;
+    } else if (array.length() < 4) {
+        m_exceptionInfo = KijangProtocol::ExceptionInfo::INVALID_LENGTH;
+        m_errorString = QString("Minimum length 32 expected for Kijang request v2 but length %1 received").arg(array.length());
+        return;
+    } else {
+        QByteArray dataSize = array.left(4);
+        quint32 dataSizeInt = qFromBigEndian<quint32>(dataSize);
+        array.remove(0, 4);
+        if (dataSizeInt > array.length()) {
+            m_exceptionInfo = KijangProtocol::ExceptionInfo::DATA_TOO_SHORT;
+            m_errorString = QString("Data length stated as %1 but remaining array length is %2").arg(dataSizeInt).arg(array.length());
+            return;
+        } else {
+            m_data = array;
+        }
+    }
     // Module and code can be 0000, client ID, request ID and packet count cannot
     if (!m_clientID || !m_requestID || !m_packetCount) {
         m_exceptionInfo = KijangProtocol::ExceptionInfo::READING_FAILED;
@@ -87,6 +114,16 @@ KijangProtocol::KijangProtocol(QByteArray array)
 KijangProtocol::~KijangProtocol()
 {
 
+}
+
+quint32 KijangProtocol::version() const
+{
+    return m_version;
+}
+
+void KijangProtocol::setVersion(quint32 newVersion)
+{
+    m_version = newVersion;
 }
 
 quint32 KijangProtocol::currentPacket() const
@@ -179,7 +216,9 @@ QByteArray KijangProtocol::toByteArray() const {
     QByteArray response;
     QDataStream stream(&response, QIODevice::WriteOnly);
     stream.setByteOrder(QDataStream::BigEndian);
-    stream << m_module << m_code << m_clientID << m_requestID << m_packetCount;
+    stream << m_version << m_module << m_code << m_clientID << m_requestID << m_packetCount << m_currentPacket;
+    if (m_version == 2) stream << m_data.size();
     response.append(m_data);
+    qDebug() << "Sending data: " << response.toHex();
     return response;
 }

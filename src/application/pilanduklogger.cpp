@@ -12,7 +12,10 @@ static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandle
 
 PilandukLogger::PilandukLogger(QObject *parent) : QObject(parent)
 {
-
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &PilandukLogger::updateLogUI);
+    timer->setInterval(500);
+    timer->start();
 }
 
 void PilandukLogger::attach()
@@ -29,6 +32,7 @@ void PilandukLogger::attach()
 void PilandukLogger::handler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QString txt;
+    QString txt1;
     switch (type) {
     case QtInfoMsg:
         txt = QString("[INFO] %1").arg(msg);
@@ -48,8 +52,9 @@ void PilandukLogger::handler(QtMsgType type, const QMessageLogContext &context, 
     }
 #ifdef QT_DEBUG
     QDir appDir(rootDir);
-    txt = QDateTime::currentDateTime().toString() + " - " + txt + " " + appDir.relativeFilePath(context.file) + " line: " + QString::number(context.line);
-    PilandukLogger::cachedLogs << txt;
+    txt = QDateTime::currentDateTime().toString() + " - " + txt;
+    txt1 = " " + appDir.relativeFilePath(context.file) + " line: " + QString::number(context.line);
+    PilandukLogger::cachedLogs << txt << txt1;
     PilandukLogger::m_logString += (txt + "\r\n");
     PilandukLogger::cacheCount += 1;
 #else
@@ -79,6 +84,16 @@ void PilandukLogger::flush()
         ts.flush();
         file.close();
     }
+}
+
+void PilandukLogger::updateLogUI()
+{
+    emit logStringChanged(m_logString);
+}
+
+void PilandukLogger::openLogsFile()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile(filename));
 }
 
 const QString &PilandukLogger::logString()

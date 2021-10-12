@@ -3,8 +3,11 @@
 
 #include <QCoreApplication>
 #include <QObject>
+#include <QUrl>
+#include <QDesktopServices>
 #include <QDebug>
 #include <QDateTime>
+#include <QTimer>
 #include <QFile>
 #include <QDir>
 #include <iostream>
@@ -21,9 +24,10 @@ public:
 
     static const QString &logString();
     static void setLogString(const QString &newLogString);
+    Q_INVOKABLE void openLogsFile();
 
 signals:
-    void logStringChanged();
+    void logStringChanged(const QString &newText);
 
 public slots:
     static void flush();
@@ -37,6 +41,9 @@ private:
     static qint64 lastExportTime;
     static int minExportInterval;
     static QString m_logString;
+
+    QTimer *timer;
+    void updateLogUI();
 
 };
 

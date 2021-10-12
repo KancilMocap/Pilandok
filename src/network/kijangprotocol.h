@@ -12,8 +12,8 @@ class KijangProtocol
 public:
     KijangProtocol();
     KijangProtocol(quint32 client);
-    KijangProtocol(quint32 client, quint64 request);
-    KijangProtocol(quint32 client, quint64 request, quint16 module, quint16 code);
+    KijangProtocol(quint32 client, quint16 module);
+    KijangProtocol(quint32 client, quint16 module, quint16 code);
     KijangProtocol(QByteArray array);
     ~KijangProtocol();
     KijangProtocol &operator=(const KijangProtocol &) = default;
@@ -22,10 +22,12 @@ public:
         NONE,
         INVALID_LENGTH,
         READING_FAILED,
-        CLIENT_ID_EXISTS
+        CLIENT_ID_EXISTS,
+        DATA_TOO_SHORT
     };
 
 private:
+    quint32 m_version;
     quint16 m_module;
     quint16 m_code;
     quint32 m_clientID;
@@ -59,6 +61,8 @@ public:
     ExceptionInfo exceptionInfo() const;
     quint32 currentPacket() const;
     void setCurrentPacket(quint32 newCurrentPacket);
+    quint32 version() const;
+    void setVersion(quint32 newVersion);
 };
 
 Q_DECLARE_METATYPE(KijangProtocol);

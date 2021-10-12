@@ -4,9 +4,18 @@
 #include "kijangprotocol.h"
 #include <QObject>
 #include <QLoggingCategory>
+#include <QDateTime>
 #include <QThread>
 #include <QDebug>
 #include <QTcpSocket>
+#include <QInputDialog>
+#include <QMetaObject>
+#include <cryptlib.h>
+#include <blake2.h>
+#include <pwdbased.h>
+#include <hkdf.h>
+#include <QRandomGenerator>
+#include "kijangmainmodule.h"
 #include "kijangservercontrolmodule.h"
 
 class KijangClient : public QObject
@@ -23,6 +32,11 @@ public:
     void connectToServer();
     void disconnectFromServer();
     void asyncSendRequest(KijangProtocol request);
+    void requestPassword(quint16 authType, QByteArray authDetails, QString title, QString message, QObject *targetModule, const char *onPasswordReceived, const char *onCancelled, const char *onDeniedAccess, const char *onError);
+
+    void pingServer();
+    void getAllMotionDevices();
+    void requestServerInfo();
 
     const QString &address() const;
     void setAddress(const QString &newAddress);
@@ -60,8 +74,11 @@ private:
     QTcpSocket socket;
     void onResponseReceived(KijangProtocol response); // Can be sync or async
     void initClientID();
+    void sendSystemInfoRequests();
 
+    KijangMainModule moduleFFFD;
     KijangServerControlModule moduleFFFE;
+    QMap<quint64, qint64> pingRecords;
 
 signals:
     void responseReceived(quint64 requestID, KijangProtocol response);
@@ -74,10 +91,13 @@ signals:
 public slots:
     void moduleSendRequest(KijangProtocol request);
     void moduleSetClientID(quint32 id);
-    void modulePongReceived();
+    void modulePongReceived(quint64 requestID);
     void moduleServerName(QString name);
     void moduleServerVersion(QString version);
     void moduleServerRequestDisconnect();
+    void moduleSystemInfoRequiresAuth(quint16 authType, QByteArray authDetails);
+    void moduleSystemInfoAuthSuccess();
+    void moduleSystemInfoAuthError();
 
 private slots:
     void clientConnected();
