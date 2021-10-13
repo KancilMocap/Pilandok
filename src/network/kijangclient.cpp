@@ -101,8 +101,6 @@ void KijangClient::requestPassword(quint16 authType, QByteArray authDetails, QSt
 
         CryptoPP::byte derived[CryptoPP::BLAKE2b::DIGESTSIZE];
         CryptoPP::byte salt[32];
-        CryptoPP::byte utf8Std[utf8Array.size()];
-        std::copy(utf8Array.constData(), utf8Array.constData() + sizeof utf8Std, utf8Std);
 
         QRandomGenerator rand;
         for (int i = 0; i < 4; i++) {
@@ -118,7 +116,7 @@ void KijangClient::requestPassword(quint16 authType, QByteArray authDetails, QSt
         CryptoPP::PKCS12_PBKDF<CryptoPP::BLAKE2b> pbkdf;
         quint8 purpose = 201;
         quint32 iterations = qFromBigEndian<quint32>(authDetails);
-        pbkdf.DeriveKey(derived, sizeof(derived), purpose, utf8Std, utf8Array.size(), salt, 32, iterations, 0.0f);
+        pbkdf.DeriveKey(derived, sizeof(derived), purpose, (unsigned char*)(utf8Array.data()), utf8Array.size(), salt, 32, iterations, 0.0f);
 
         char derivedChar[CryptoPP::BLAKE2b::DIGESTSIZE];
         for (unsigned int i = 0; i < CryptoPP::BLAKE2b::DIGESTSIZE; i++) {
@@ -153,10 +151,7 @@ void KijangClient::requestPassword(quint16 authType, QByteArray authDetails, QSt
 
         CryptoPP::byte derived[CryptoPP::BLAKE2b::DIGESTSIZE];
         CryptoPP::byte salt[32];
-        CryptoPP::byte utf8Std[utf8Array.size()];
-        CryptoPP::byte info[m_serverVersion.size()];
-        std::copy(utf8Array.constData(), utf8Array.constData() + sizeof utf8Std, utf8Std);
-        std::copy(m_serverVersion.constData(), m_serverVersion.constData() + sizeof info, info);
+        QByteArray infoArray = m_serverVersion.toUtf8();
 
         QRandomGenerator rand;
         for (int i = 0; i < 4; i++) {
@@ -170,7 +165,7 @@ void KijangClient::requestPassword(quint16 authType, QByteArray authDetails, QSt
             }
         }
         CryptoPP::HKDF<CryptoPP::BLAKE2b> hkdf;
-        hkdf.DeriveKey(derived, sizeof(derived), utf8Std, utf8Array.size(), salt, 32, info, m_serverVersion.size());
+        hkdf.DeriveKey(derived, sizeof(derived), (unsigned char*)(utf8Array.data()), utf8Array.size(), salt, 32, (unsigned char*)(infoArray.data()), infoArray.size());
 
         char derivedChar[CryptoPP::BLAKE2b::DIGESTSIZE];
         for (unsigned int i = 0; i < CryptoPP::BLAKE2b::DIGESTSIZE; i++) {

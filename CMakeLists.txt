@@ -54,9 +54,15 @@ else()
 endif()
 
 add_library(cryptopp STATIC IMPORTED)
-set_target_properties(cryptopp PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/cryptlib.lib"
-    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/inc/cryptopp")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_target_properties(cryptopp PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/cryptlib-debug.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/inc/cryptopp")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Rel") # Need to manually change the cmake build type in the 'Release' configuration to "Rel"
+    set_target_properties(cryptopp PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/cryptlib-release.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/inc/cryptopp")
+endif()
 
 target_compile_definitions(pilandok
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
