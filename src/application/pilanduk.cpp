@@ -15,7 +15,7 @@ Pilanduk::~Pilanduk()
 
 int Pilanduk::run(int argc, char **argv)
 {
-    qRegisterMetaType<KijangProtocol>();
+    qRegisterMetaType<Kijang::KijangProtocol>();
 
     // Set application info
     QCoreApplication::setApplicationName("Kijang");

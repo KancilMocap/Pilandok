@@ -22,7 +22,6 @@ set(PROJECT_SOURCES
         src/network/kijangclientmodule.h src/network/kijangclientmodule.cpp
         src/network/kijangservercontrolmodule.h src/network/kijangservercontrolmodule.cpp
         src/network/kijangmainmodule.h src/network/kijangmainmodule.cpp
-        src/network/kijangprotocol.h src/network/kijangprotocol.cpp
         src/output/pilandukoutputmanager.h src/output/pilandukoutputmanager.cpp
         src/output/pilandukaudiooutput.h src/output/pilandukaudiooutput.cpp
         src/output/pilandukvideooutput.h src/output/pilandukvideooutput.cpp
@@ -53,12 +52,22 @@ else()
     endif()
 endif()
 
+add_library(kijangprotocol STATIC IMPORTED)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_target_properties(kijangprotocol PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/kijangProtocol-debug.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/inc/kijangProtocol")
+else()
+    set_target_properties(kijangprotocol PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/kijangProtocol-release.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/inc/kijangProtocol")
+endif()
 add_library(cryptopp STATIC IMPORTED)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set_target_properties(cryptopp PROPERTIES
         IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/cryptlib-debug.lib"
         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/inc/cryptopp")
-elseif (CMAKE_BUILD_TYPE STREQUAL "Rel") # Need to manually change the cmake build type in the 'Release' configuration to "Rel"
+else()
     set_target_properties(cryptopp PROPERTIES
         IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/cryptlib-release.lib"
         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/inc/cryptopp")
@@ -67,7 +76,7 @@ endif()
 target_compile_definitions(pilandok
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(pilandok
-  PRIVATE cryptopp Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Widgets)
+  PRIVATE cryptopp kijangprotocol Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Widgets)
 
 set_target_properties(pilandok PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER moe.kancil.pilandok

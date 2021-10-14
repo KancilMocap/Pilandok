@@ -2,18 +2,18 @@
 #define KIJANGCLIENTMODULE_H
 
 #include <QObject>
-#include "kijangprotocol.h"
+#include <kijangprotocol.h>
 
 class KijangClientModule : public QObject
 {
     Q_OBJECT
 public:
     explicit KijangClientModule(QObject *parent = nullptr);
-    virtual void handleResponse(KijangProtocol response) = 0;
+    virtual void handleResponse(Kijang::KijangProtocol response) = 0;
     quint32 module() const;
 
 signals:
-    void sendRequest(KijangProtocol request);
+    void sendRequest(Kijang::KijangProtocol request);
 
 protected:
     quint32 m_module;

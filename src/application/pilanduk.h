@@ -9,9 +9,9 @@
 #include <QVersionNumber>
 #include <QSharedPointer>
 #include <QtQml>
+#include <kijangprotocol.h>
 #include "pilanduklogger.h"
 #include "../network/kijangclient.h"
-#include "../network/kijangprotocol.h"
 #include "../output/pilandukoutputmanager.h"
 
 class Pilanduk : public QObject

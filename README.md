@@ -15,6 +15,5 @@
 
 ## Compilation Instructions
 
+- Download the compatible version of KijangProtocol from [https://github.com/KancilMocap/KijangProtocol/releases](https://github.com/KancilMocap/KijangProtocol/releases)
 - Download the prebuilt static Cryptopp releases from [https://drive.google.com/drive/folders/1tlAOTFFkR6ZWTRoRkCFklAI86sZ3zNqc?usp=sharing](https://drive.google.com/drive/folders/1tlAOTFFkR6ZWTRoRkCFklAI86sZ3zNqc?usp=sharing) and place them in ./lib
-- For MSVC 2019, the following error may occur while compiling the project: `LNK2038: mismatch detected for 'RuntimeLibrary': value 'MTd_StaticDebug' doesn't match value 'MDd_DynamicDebug'`
-- If that happens, go into the build folder and replace all '/MD' with '/MT'

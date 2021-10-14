@@ -58,13 +58,13 @@ void KijangClient::disconnectFromServer()
     waitingForDisconnectReceived = false;
     if (socket.isOpen()) {
         // Send disconnect notification
-        KijangProtocol disconnectRequest(m_clientID, 32767, 15); // 7FFF, 000F
+        Kijang::KijangProtocol disconnectRequest(m_clientID, 32767, 15); // 7FFF, 000F
         asyncSendRequest(disconnectRequest);
         socket.disconnectFromHost();
     }
 }
 
-void KijangClient::asyncSendRequest(KijangProtocol request)
+void KijangClient::asyncSendRequest(Kijang::KijangProtocol request)
 {
     socket.write(request.toByteArray());
     socket.waitForBytesWritten();
@@ -201,7 +201,7 @@ void KijangClient::requestPassword(quint16 authType, QByteArray authDetails, QSt
 
 void KijangClient::pingServer()
 {
-    KijangProtocol request(m_clientID, 32767, 2); // 7FFF, 0002
+    Kijang::KijangProtocol request(m_clientID, 32767, 2); // 7FFF, 0002
     asyncSendRequest(request);
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
     pingRecords.insert(request.requestID(), startTime);
@@ -209,17 +209,17 @@ void KijangClient::pingServer()
 
 void KijangClient::getAllMotionDevices()
 {
-    KijangProtocol request(m_clientID, 32766, 5); // 7FFE, 0005
+    Kijang::KijangProtocol request(m_clientID, 32766, 5); // 7FFE, 0005
     asyncSendRequest(request);
 }
 
 void KijangClient::requestServerInfo()
 {
     // Server name
-    KijangProtocol request1(m_clientID, 32767, 4); // 7FFF, 0004
+    Kijang::KijangProtocol request1(m_clientID, 32767, 4); // 7FFF, 0004
     asyncSendRequest(request1);
     // Server version
-    KijangProtocol request2(m_clientID, 32767, 5); // 7FFF, 0005
+    Kijang::KijangProtocol request2(m_clientID, 32767, 5); // 7FFF, 0005
     asyncSendRequest(request2);
 }
 
@@ -298,7 +298,7 @@ const QString &KijangClient::serverVersion() const
     return m_serverVersion;
 }
 
-void KijangClient::onResponseReceived(KijangProtocol response)
+void KijangClient::onResponseReceived(Kijang::KijangProtocol response)
 {
     // Ignore if response is to wait
     if (response.module() == 65535) return; // FFFF - Async wait
@@ -324,7 +324,7 @@ void KijangClient::onResponseReceived(KijangProtocol response)
 void KijangClient::initClientID()
 {
     // Create initial request
-    KijangProtocol initRequest;
+    Kijang::KijangProtocol initRequest;
     initRequest.setModule(32767); // 7FFF - Control module
     initRequest.setCode(1); // 0001
     asyncSendRequest(initRequest);
@@ -334,29 +334,29 @@ void KijangClient::sendSystemInfoRequests()
 {
     // requestxx(m_clientID, 7FFF, yy)
     // xx is hex, yy is decimal
-    KijangProtocol request12(m_clientID, 32767, 18);
+    Kijang::KijangProtocol request12(m_clientID, 32767, 18);
     asyncSendRequest(request12);
-    KijangProtocol request13(m_clientID, 32767, 19);
+    Kijang::KijangProtocol request13(m_clientID, 32767, 19);
     asyncSendRequest(request13);
-    KijangProtocol request14(m_clientID, 32767, 20);
+    Kijang::KijangProtocol request14(m_clientID, 32767, 20);
     asyncSendRequest(request14);
-    KijangProtocol request15(m_clientID, 32767, 21);
+    Kijang::KijangProtocol request15(m_clientID, 32767, 21);
     asyncSendRequest(request15);
-    KijangProtocol request16(m_clientID, 32767, 22);
+    Kijang::KijangProtocol request16(m_clientID, 32767, 22);
     asyncSendRequest(request16);
-    KijangProtocol request17(m_clientID, 32767, 23);
+    Kijang::KijangProtocol request17(m_clientID, 32767, 23);
     asyncSendRequest(request17);
-    KijangProtocol request20(m_clientID, 32767, 32);
+    Kijang::KijangProtocol request20(m_clientID, 32767, 32);
     asyncSendRequest(request20);
-    KijangProtocol request21(m_clientID, 32767, 33);
+    Kijang::KijangProtocol request21(m_clientID, 32767, 33);
     asyncSendRequest(request21);
-    KijangProtocol request22(m_clientID, 32767, 34);
+    Kijang::KijangProtocol request22(m_clientID, 32767, 34);
     asyncSendRequest(request22);
-    KijangProtocol request23(m_clientID, 32767, 35);
+    Kijang::KijangProtocol request23(m_clientID, 32767, 35);
     asyncSendRequest(request23);
 }
 
-void KijangClient::moduleSendRequest(KijangProtocol request) {
+void KijangClient::moduleSendRequest(Kijang::KijangProtocol request) {
     asyncSendRequest(request); // Forward request
 }
 
@@ -388,7 +388,7 @@ void KijangClient::moduleServerVersion(QString version)
 {
     m_serverVersion = version;
     // Check if system info is blocked
-    KijangProtocol request(m_clientID, 32767, 16); // 7FFF, 0010
+    Kijang::KijangProtocol request(m_clientID, 32767, 16); // 7FFF, 0010
     asyncSendRequest(request);
 }
 
@@ -443,8 +443,8 @@ void KijangClient::clientStateChanged(QAbstractSocket::SocketState socketState) 
 
 void KijangClient::clientReadyRead() {
     QByteArray currentData = socket.readAll();
-    KijangProtocol response(currentData);
-    if (response.exceptionInfo() == KijangProtocol::ExceptionInfo::NONE) {
+    Kijang::KijangProtocol response(currentData);
+    if (response.exceptionInfo() == Kijang::KijangProtocol::ExceptionInfo::NONE) {
         onResponseReceived(response);
     } else {
         qWarning(client) << "Unable to parse data from client as";

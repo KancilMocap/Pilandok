@@ -12,7 +12,7 @@ public:
 
     // KijangClientModule interface
 public:
-    void handleResponse(KijangProtocol response) Q_DECL_OVERRIDE;
+    void handleResponse(Kijang::KijangProtocol response) Q_DECL_OVERRIDE;
 };
 
 #endif // KIJANGMAINMODULE_H
