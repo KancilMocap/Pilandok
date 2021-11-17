@@ -16,41 +16,23 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Concurrent Quick Widg
 
 set(PROJECT_SOURCES
         src/main.cpp
-        src/application/pilanduk.h src/application/pilanduk.cpp
-        src/application/pilanduklogger.h src/application/pilanduklogger.cpp
+        src/application/pilandok.h src/application/pilandok.cpp
+        src/application/pilandoklogger.h src/application/pilandoklogger.cpp
         src/network/kijangclient.h src/network/kijangclient.cpp
         src/network/kijangclientmodule.h src/network/kijangclientmodule.cpp
         src/network/kijangservercontrolmodule.h src/network/kijangservercontrolmodule.cpp
         src/network/kijangmainmodule.h src/network/kijangmainmodule.cpp
-        src/output/pilandukoutputmanager.h src/output/pilandukoutputmanager.cpp
-        src/output/pilandukaudiooutput.h src/output/pilandukaudiooutput.cpp
-        src/output/pilandukvideooutput.h src/output/pilandukvideooutput.cpp
+        src/output/pilandokoutputmanager.h src/output/pilandokoutputmanager.cpp
+        src/output/pilandokaudiooutput.h src/output/pilandokaudiooutput.cpp
+        src/output/pilandokvideooutput.h src/output/pilandokvideooutput.cpp
         src/input/kijangmotioninput.h src/input/kijangmotioninput.cpp
         qml.qrc
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(pilandok
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET pilandok APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(pilandok SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(pilandok
-          ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
+qt_add_executable(pilandok
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
 
 add_library(kijangprotocol STATIC IMPORTED)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

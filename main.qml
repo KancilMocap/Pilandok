@@ -9,7 +9,7 @@ Window {
     height: 360
 
     visible: true
-    title: qsTr("Pilanduk")
+    title: qsTr("Pilandok")
 
     ColumnLayout {
         anchors.fill: parent
@@ -58,9 +58,9 @@ Window {
                 id: allowLocalWebcam
                 objectName: "allowLocalWebcam"
                 text: qsTr("Allow use of webcam")
-                onClicked: pilandukOutputManager.allowLocalWebcam = checked
-                Component.onCompleted: checked = pilandukOutputManager.allowLocalWebcam
-                onStateChanged: allowLocalWebcam.checked = pilandukOutputManager.allowLocalWebcam
+                onClicked: pilandokOutputManager.allowLocalWebcam = checked
+                Component.onCompleted: checked = pilandokOutputManager.allowLocalWebcam
+                onStateChanged: allowLocalWebcam.checked = pilandokOutputManager.allowLocalWebcam
             }
 
             MediaDevices { id: mediaDevices }
@@ -92,7 +92,7 @@ Window {
 
             Button {
                 text: "Open logs file"
-                onClicked: pilandukLogsUI.openLogsFile()
+                onClicked: pilandokLogsUI.openLogsFile()
             }
         }
 
@@ -100,7 +100,7 @@ Window {
             Layout.fillHeight: true
             Layout.fillWidth: true
             Text {
-                text: pilandukLogsUI.logString
+                text: pilandokLogsUI.logString
             }
         }
     }

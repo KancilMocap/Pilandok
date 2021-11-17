@@ -1,13 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include "application/pilanduk.h"
-#include "application/pilanduklogger.h"
+#include "application/pilandok.h"
+#include "application/pilandoklogger.h"
 
 int main(int argc, char *argv[])
 {
-    Pilanduk pilanduk;
-    int response = pilanduk.run(argc, argv);
+    Pilandok pilandok;
+    int response = pilandok.run(argc, argv);
     qDebug() << "Response code: " << response;
-    PilandukLogger::flush();
+    PilandokLogger::flush();
     return response;
 }

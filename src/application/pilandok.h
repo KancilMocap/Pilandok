@@ -1,5 +1,5 @@
-#ifndef PILANDUK_H
-#define PILANDUK_H
+#ifndef PILANDOK_H
+#define PILANDOK_H
 
 #include <QDebug>
 #include <QGuiApplication>
@@ -10,16 +10,16 @@
 #include <QSharedPointer>
 #include <QtQml>
 #include <kijangprotocol.h>
-#include "pilanduklogger.h"
+#include "pilandoklogger.h"
 #include "../network/kijangclient.h"
-#include "../output/pilandukoutputmanager.h"
+#include "../output/pilandokoutputmanager.h"
 
-class Pilanduk : public QObject
+class Pilandok : public QObject
 {
     Q_OBJECT
 public:
-    explicit Pilanduk(QObject *parent = nullptr);
-    ~Pilanduk();
+    explicit Pilandok(QObject *parent = nullptr);
+    ~Pilandok();
 
     int run(int argc, char** argv);
 
@@ -27,7 +27,7 @@ public:
 
 private:
     KijangClient m_client;
-    PilandukOutputManager m_outputManager;
+    PilandokOutputManager m_outputManager;
     QSharedPointer<QQmlApplicationEngine> m_engine;
 
 signals:
@@ -36,4 +36,4 @@ public slots:
 
 };
 
-#endif // PILANDUK_H
+#endif // PILANDOK_H

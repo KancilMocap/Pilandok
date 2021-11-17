@@ -1,5 +1,5 @@
-#ifndef PILANDUKLOGGER_H
-#define PILANDUKLOGGER_H
+#ifndef PILANDOKLOGGER_H
+#define PILANDOKLOGGER_H
 
 #include <QCoreApplication>
 #include <QObject>
@@ -13,12 +13,12 @@
 #include <iostream>
 #include <QTextStream>
 
-class PilandukLogger : public QObject
+class PilandokLogger : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString logString READ logString WRITE setLogString NOTIFY logStringChanged)
 public:
-    explicit PilandukLogger(QObject *parent = nullptr);
+    explicit PilandokLogger(QObject *parent = nullptr);
     static void attach();
     static void handler(QtMsgType type, const QMessageLogContext &context, const QString & msg);
 
@@ -47,4 +47,4 @@ private:
 
 };
 
-#endif // PILANDUKLOGGER_H
+#endif // PILANDOKLOGGER_H
