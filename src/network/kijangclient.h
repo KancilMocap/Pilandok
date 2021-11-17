@@ -10,6 +10,8 @@
 #include <QTcpSocket>
 #include <QInputDialog>
 #include <QMetaObject>
+#include <QDir>
+#include <QSettings>
 #include <cryptlib.h>
 #include <blake2.h>
 #include <pwdbased.h>
@@ -28,6 +30,7 @@ class KijangClient : public QObject
     Q_PROPERTY(QString buttonString READ buttonString WRITE setButtonString NOTIFY buttonStringChanged)
 public:
     explicit KijangClient(QObject *parent = nullptr);
+    ~KijangClient();
     Q_INVOKABLE void toggleConnection();
     void connectToServer();
     void disconnectFromServer();
@@ -57,6 +60,7 @@ public:
     const QString &serverVersion() const;
 
 private:
+    static QString settingsFile;
     bool internalConnectionSet;
     bool m_connected;
     bool m_attemptingConnection;

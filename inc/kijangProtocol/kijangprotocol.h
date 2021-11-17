@@ -18,6 +18,7 @@ public:
     KijangProtocol(quint32 client, quint16 module);
     KijangProtocol(quint32 client, quint16 module, quint16 code);
     KijangProtocol(QByteArray array);
+    KijangProtocol(QByteArray array, quint32 client);
     ~KijangProtocol();
     KijangProtocol &operator=(const KijangProtocol &) = default;
 
@@ -40,6 +41,9 @@ private:
     QByteArray m_data;
     ExceptionInfo m_exceptionInfo;
     QString m_errorString;
+
+    void initDefault();
+    void initFromArray(QByteArray array, quint32 clientFallback);
 
 public:
     // To section

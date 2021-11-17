@@ -3,6 +3,8 @@
 Q_DECLARE_LOGGING_CATEGORY(client);
 Q_LOGGING_CATEGORY(client,"client");
 
+QString KijangClient::settingsFile = QDir::currentPath() + QDir::separator() + "settings.ini";
+
 KijangClient::KijangClient(QObject *parent) : QObject(parent)
 {
     setConnected(false);
@@ -11,6 +13,23 @@ KijangClient::KijangClient(QObject *parent) : QObject(parent)
     internalConnectionSet = false;
     waitingForDisconnectReceived = false;
     m_clientID = 0;
+
+    // Load address and port
+    QSettings settings(settingsFile, QSettings::IniFormat);
+    settings.beginGroup("client");
+    setAddress(settings.value("address", "localhost").toString());
+    setPort(settings.value("port", 4318).toUInt());
+    settings.endGroup();
+}
+
+KijangClient::~KijangClient()
+{
+    QSettings settings(settingsFile, QSettings::IniFormat);
+    settings.beginGroup("client");
+    settings.setValue("address", m_address);
+    settings.setValue("port", m_port);
+    settings.endGroup();
+    settings.sync();
 }
 
 void KijangClient::toggleConnection()
@@ -243,7 +262,10 @@ quint16 KijangClient::port() const
 
 void KijangClient::setPort(quint16 newPort)
 {
-    m_port = newPort;
+    if (m_port != newPort) {
+        m_port = newPort;
+        emit portChanged();
+    }
 }
 
 bool KijangClient::connected() const
