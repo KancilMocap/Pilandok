@@ -52,18 +52,18 @@ void KijangClient::connectToServer()
         connect(&socket,&QTcpSocket::readyRead,this,&KijangClient::clientReadyRead);
 
         // FFFD handlers
-        connect(&moduleFFFD,&KijangMainModule::sendRequest,this,&KijangClient::moduleSendRequest);
+        connect(&moduleFFFE,&KijangMainModule::sendRequest,this,&KijangClient::moduleSendRequest);
 
         // FFFE handlers
-        connect(&moduleFFFE,&KijangServerControlModule::sendRequest,this,&KijangClient::moduleSendRequest);
-        connect(&moduleFFFE,&KijangServerControlModule::setClientID,this,&KijangClient::moduleSetClientID);
-        connect(&moduleFFFE,&KijangServerControlModule::pongReceived,this,&KijangClient::modulePongReceived);
-        connect(&moduleFFFE,&KijangServerControlModule::serverName,this,&KijangClient::moduleServerName);
-        connect(&moduleFFFE,&KijangServerControlModule::serverVersion,this,&KijangClient::moduleServerVersion);
-        connect(&moduleFFFE,&KijangServerControlModule::serverRequestDisconnect,this,&KijangClient::moduleServerRequestDisconnect);
-        connect(&moduleFFFE,&KijangServerControlModule::systemInfoRequiresAuth,this,&KijangClient::moduleSystemInfoRequiresAuth);
-        connect(&moduleFFFE,&KijangServerControlModule::systemInfoAuthSuccess,this,&KijangClient::moduleSystemInfoAuthSuccess);
-        connect(&moduleFFFE,&KijangServerControlModule::systemInfoAuthError,this,&KijangClient::moduleSystemInfoAuthError);
+        connect(&moduleFFFF,&KijangServerControlModule::sendRequest,this,&KijangClient::moduleSendRequest);
+        connect(&moduleFFFF,&KijangServerControlModule::setClientID,this,&KijangClient::moduleSetClientID);
+        connect(&moduleFFFF,&KijangServerControlModule::pongReceived,this,&KijangClient::modulePongReceived);
+        connect(&moduleFFFF,&KijangServerControlModule::serverName,this,&KijangClient::moduleServerName);
+        connect(&moduleFFFF,&KijangServerControlModule::serverVersion,this,&KijangClient::moduleServerVersion);
+        connect(&moduleFFFF,&KijangServerControlModule::serverRequestDisconnect,this,&KijangClient::moduleServerRequestDisconnect);
+        connect(&moduleFFFF,&KijangServerControlModule::systemInfoRequiresAuth,this,&KijangClient::moduleSystemInfoRequiresAuth);
+        connect(&moduleFFFF,&KijangServerControlModule::systemInfoAuthSuccess,this,&KijangClient::moduleSystemInfoAuthSuccess);
+        connect(&moduleFFFF,&KijangServerControlModule::systemInfoAuthError,this,&KijangClient::moduleSystemInfoAuthError);
         internalConnectionSet = true;
     }
     socket.connectToHost(m_address, m_port);
@@ -322,20 +322,17 @@ const QString &KijangClient::serverVersion() const
 
 void KijangClient::onResponseReceived(Kijang::KijangProtocol response)
 {
-    // Ignore if response is to wait
-    if (response.module() == 65535) return; // FFFF - Async wait
-
     if (m_clientID != response.clientID() && m_clientID) {
         qDebug(client) << "Response received for different client " << response.clientID() << ", would not handle";
         return;
     }
 
     switch (response.module()) {
-    case 65533: { // FFFD - Kijang module
-        moduleFFFD.handleResponse(response);
-    }
-    case 65534: { // FFFE - Server control module
+    case 65534: { // FFFE - Kijang module
         moduleFFFE.handleResponse(response);
+    }
+    case 65535: { // FFFF - Server control module
+        moduleFFFF.handleResponse(response);
     }
     default: {
         emit responseReceived(response.requestID(), response);
@@ -421,7 +418,7 @@ void KijangClient::moduleServerRequestDisconnect()
 
 void KijangClient::moduleSystemInfoRequiresAuth(quint16 authType, QByteArray authDetails)
 {
-    requestPassword(authType, authDetails, "System Info Authentication", "A password is needed to access the system info of the device.", &moduleFFFE, SLOT(moduleFFFE.systemInfoAuthReceived), nullptr, nullptr, nullptr);
+    requestPassword(authType, authDetails, "System Info Authentication", "A password is needed to access the system info of the device.", &moduleFFFF, SLOT(moduleFFFF.systemInfoAuthReceived), nullptr, nullptr, nullptr);
 }
 
 void KijangClient::moduleSystemInfoAuthSuccess()

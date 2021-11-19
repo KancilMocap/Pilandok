@@ -80,8 +80,8 @@ private:
     void initClientID();
     void sendSystemInfoRequests();
 
-    KijangMainModule moduleFFFD;
-    KijangServerControlModule moduleFFFE;
+    KijangMainModule moduleFFFE;
+    KijangServerControlModule moduleFFFF;
     QMap<quint64, qint64> pingRecords;
 
 signals:

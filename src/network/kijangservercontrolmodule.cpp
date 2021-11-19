@@ -1,11 +1,11 @@
 #include "kijangservercontrolmodule.h"
 
 Q_DECLARE_LOGGING_CATEGORY(serverControl);
-Q_LOGGING_CATEGORY(serverControl,"clientModule-FFFE");
+Q_LOGGING_CATEGORY(serverControl,"clientModule-FFFF");
 
 KijangServerControlModule::KijangServerControlModule(QObject *parent) : KijangClientModule(parent)
 {
-    m_module = 65534; // FFFE - Control module (server)
+    m_module = 65535; // FFFF - Control module (server)
 }
 
 void KijangServerControlModule::handleResponse(Kijang::KijangProtocol response)
