@@ -8,7 +8,7 @@ KijangServerControlModule::KijangServerControlModule(QObject *parent) : KijangCl
     m_module = 65535; // FFFF - Control module (server)
 }
 
-void KijangServerControlModule::handleResponse(Kijang::KijangProtocol response)
+void KijangServerControlModule::handleResponse(KijangProtocol response)
 {
     QString responseString = QString::fromUtf8(response.data(), response.data().size());
     switch (response.code()) {
@@ -133,6 +133,6 @@ void KijangServerControlModule::handleResponse(Kijang::KijangProtocol response)
 
 void KijangServerControlModule::systemInfoAuthReceived(quint32 clientID, QByteArray response)
 {
-    Kijang::KijangProtocol request(clientID, 32767, 17); // 7FFF, 0011
+    KijangProtocol request(clientID, 32767, 17); // 7FFF, 0011
     emit sendRequest(request);
 }

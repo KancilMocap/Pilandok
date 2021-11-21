@@ -25,7 +25,7 @@ signals:
     void systemInfoAuthError();
 
 public:
-    void handleResponse(Kijang::KijangProtocol response) Q_DECL_OVERRIDE;
+    void handleResponse(KijangProtocol response) Q_DECL_OVERRIDE;
     void systemInfoAuthReceived(quint32 clientID, QByteArray response); // Note: Argument name MUST be "response" due to QMetaObject call from KijangClient::requestPassword
 };
 

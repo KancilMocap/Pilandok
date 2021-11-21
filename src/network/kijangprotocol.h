@@ -1,16 +1,13 @@
 #ifndef KIJANGPROTOCOL_H
 #define KIJANGPROTOCOL_H
 
-#include "KijangProtocol_global.h"
 #include <QDebug>
 #include <QDataStream>
 #include <QIODevice>
 #include <QtEndian>
 #include <QRandomGenerator>
 
-namespace Kijang {
-
-class KIJANGPROTOCOL_EXPORT KijangProtocol
+class KijangProtocol
 {
 public:
     KijangProtocol();
@@ -72,7 +69,4 @@ public:
     void setVersion(quint32 newVersion);
 };
 
-}
-
-Q_DECLARE_METATYPE(Kijang::KijangProtocol);
 #endif // KIJANGPROTOCOL_H

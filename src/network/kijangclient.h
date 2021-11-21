@@ -1,7 +1,6 @@
 #ifndef KIJANGCLIENT_H
 #define KIJANGCLIENT_H
 
-#include <kijangprotocol.h>
 #include <QObject>
 #include <QLoggingCategory>
 #include <QDateTime>
@@ -19,6 +18,7 @@
 #include <QRandomGenerator>
 #include "kijangmainmodule.h"
 #include "kijangservercontrolmodule.h"
+#include "kijangprotocol.h"
 
 class KijangClient : public QObject
 {
@@ -34,7 +34,7 @@ public:
     Q_INVOKABLE void toggleConnection();
     void connectToServer();
     void disconnectFromServer();
-    void asyncSendRequest(Kijang::KijangProtocol request);
+    void asyncSendRequest(KijangProtocol request);
     void requestPassword(quint16 authType, QByteArray authDetails, QString title, QString message, QObject *targetModule, const char *onPasswordReceived, const char *onCancelled, const char *onDeniedAccess, const char *onError);
 
     void pingServer();
@@ -76,7 +76,7 @@ private:
     QString m_serverVersion;
 
     QTcpSocket socket;
-    void onResponseReceived(Kijang::KijangProtocol response); // Can be sync or async
+    void onResponseReceived(KijangProtocol response); // Can be sync or async
     void initClientID();
     void sendSystemInfoRequests();
 
@@ -85,7 +85,7 @@ private:
     QMap<quint64, qint64> pingRecords;
 
 signals:
-    void responseReceived(quint64 requestID, Kijang::KijangProtocol response);
+    void responseReceived(quint64 requestID, KijangProtocol response);
     void connectedChanged();
     void addressChanged();
     void portChanged();
@@ -93,7 +93,7 @@ signals:
     void buttonStringChanged();
 
 public slots:
-    void moduleSendRequest(Kijang::KijangProtocol request);
+    void moduleSendRequest(KijangProtocol request);
     void moduleSetClientID(quint32 id);
     void modulePongReceived(quint64 requestID);
     void moduleServerName(QString name);

@@ -9,7 +9,7 @@
 #include <QVersionNumber>
 #include <QSharedPointer>
 #include <QtQml>
-#include <kijangprotocol.h>
+#include "../network/kijangprotocol.h"
 #include "pilandoklogger.h"
 #include "../network/kijangclient.h"
 #include "../output/pilandokoutputmanager.h"

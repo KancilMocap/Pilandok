@@ -15,7 +15,7 @@ Pilandok::~Pilandok()
 
 int Pilandok::run(int argc, char **argv)
 {
-    qRegisterMetaType<Kijang::KijangProtocol>();
+    qRegisterMetaType<KijangProtocol>();
 
     // Set application info
     QCoreApplication::setApplicationName("Pilandok");
