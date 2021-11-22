@@ -11,7 +11,7 @@
 #include <QtQml>
 #include "../network/kijangprotocol.h"
 #include "pilandoklogger.h"
-#include "../network/kijangclient.h"
+#include "../network/kijangclientcontroller.h"
 #include "../output/pilandokoutputmanager.h"
 
 class Pilandok : public QObject
@@ -20,13 +20,10 @@ class Pilandok : public QObject
 public:
     explicit Pilandok(QObject *parent = nullptr);
     ~Pilandok();
-
     int run(int argc, char** argv);
 
-    const KijangClient &client() const;
-
 private:
-    KijangClient m_client;
+    KijangClientController m_clientController;
     PilandokOutputManager m_outputManager;
     QSharedPointer<QQmlApplicationEngine> m_engine;
 

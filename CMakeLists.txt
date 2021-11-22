@@ -23,6 +23,9 @@ set(PROJECT_SOURCES
         src/network/kijangservercontrolmodule.h src/network/kijangservercontrolmodule.cpp
         src/network/kijangmainmodule.h src/network/kijangmainmodule.cpp
         src/network/kijangprotocol.h src/network/kijangprotocol.cpp
+        src/network/kijangclientcontroller.h src/network/kijangclientcontroller.cpp
+        src/network/kijangreadclient.h src/network/kijangreadclient.cpp
+        src/network/kijangwriteclient.h src/network/kijangwriteclient.cpp
         src/output/pilandokoutputmanager.h src/output/pilandokoutputmanager.cpp
         src/output/pilandokaudiooutput.h src/output/pilandokaudiooutput.cpp
         src/output/pilandokvideooutput.h src/output/pilandokvideooutput.cpp

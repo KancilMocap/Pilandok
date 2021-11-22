@@ -26,10 +26,10 @@ Window {
             }
 
             TextField {
-                enabled: !(kijangClient.connected || kijangClient.attemptingConnection)
+                enabled: !clientController.inputsLocked
                 inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: kijangClient.address
-                onFocusChanged: kijangClient.address = text
+                text: clientController.address
+                onFocusChanged: clientController.address = text
             }
         }
 
@@ -41,11 +41,11 @@ Window {
             }
 
             SpinBox {
-                enabled: !(kijangClient.connected || kijangClient.attemptingConnection)
+                enabled: !clientController.inputsLocked
                 from: 1
                 to: 65535
-                value: kijangClient.port
-                onValueChanged: kijangClient.port = value
+                value: clientController.readPort
+                onValueChanged: clientController.readPort = value
                 editable: true
             }
         }
@@ -54,7 +54,7 @@ Window {
             id: cameraRow
             width: parent.width
             CheckBox {
-                enabled: !(kijangClient.connected || kijangClient.attemptingConnection)
+                enabled: !clientController.inputsLocked
                 id: allowLocalWebcam
                 objectName: "allowLocalWebcam"
                 text: qsTr("Allow use of webcam")
@@ -84,10 +84,10 @@ Window {
 
         RowLayout {
             Button {
-                enabled: !kijangClient.attemptingConnection
+                enabled: !clientController.lockConnectButton
                 id: connectButton
-                text: kijangClient.buttonString
-                onClicked: kijangClient.toggleConnection()
+                text: clientController.showConnected ? qsTr("Disconnect") : qsTr("Connect")
+                onClicked: clientController.toggleConnection()
             }
 
             Button {
@@ -100,7 +100,7 @@ Window {
             Layout.fillHeight: true
             Layout.fillWidth: true
             Text {
-                text: pilandokLogsUI.logString
+                text: pilandokLogsUI == null ? "" : pilandokLogsUI.logString
             }
         }
     }

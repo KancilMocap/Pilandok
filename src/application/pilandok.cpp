@@ -38,9 +38,8 @@ int Pilandok::run(int argc, char **argv)
     QGuiApplication app(argc, argv);
     m_engine = QSharedPointer<QQmlApplicationEngine>(new QQmlApplicationEngine());
     PilandokLogger logger;
-    m_engine->rootContext()->setContextProperty("pilandokApp", this);
     m_engine->rootContext()->setContextProperty("pilandokLogsUI", &logger);
-    m_engine->rootContext()->setContextProperty("kijangClient", &m_client);
+    m_engine->rootContext()->setContextProperty("clientController", &m_clientController);
     m_engine->rootContext()->setContextProperty("pilandokOutputManager", &m_outputManager);
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(m_engine.data(), &QQmlApplicationEngine::objectCreated,
@@ -51,9 +50,4 @@ int Pilandok::run(int argc, char **argv)
     m_engine->load(url);
 
     return app.exec();
-}
-
-const KijangClient &Pilandok::client() const
-{
-    return m_client;
 }
