@@ -7,7 +7,7 @@ QString KijangClientController::settingsFile = QDir::currentPath() + QDir::separ
 
 KijangClientController::KijangClientController(QObject *parent) : QObject(parent)
 {
-    setButtonString("Connect");
+    setShowConnected(false);
 
     // Load address and port
     QSettings settings(settingsFile, QSettings::IniFormat);
@@ -15,6 +15,14 @@ KijangClientController::KijangClientController(QObject *parent) : QObject(parent
     setAddress(settings.value("address", "localhost").toString());
     setReadPort(settings.value("read_port", 4318).toUInt());
     settings.endGroup();
+
+    // Connect read and write clients
+    connect(&m_readClient, &KijangClient::connectedChanged, this, &KijangClientController::readConnectedChanged);
+    connect(&m_readClient, &KijangClient::attemptingConnectionChanged, this, &KijangClientController::attemptingConnectionChanged);
+    connect(&m_writeClient, &KijangClient::connectedChanged, this, &KijangClientController::writeConnectedChanged);
+    connect(&m_writeClient, &KijangClient::attemptingConnectionChanged, this, &KijangClientController::attemptingConnectionChanged);
+    connect(&m_readClient, &KijangReadClient::responseReceived, this, &KijangClientController::responseReceived);
+    connect(&m_readClient, &KijangReadClient::writeDataReceived, this, &KijangClientController::writeDataReceived);
 }
 
 KijangClientController::~KijangClientController()
@@ -29,7 +37,12 @@ KijangClientController::~KijangClientController()
 
 void KijangClientController::toggleConnection()
 {
-    // TODO: Complete
+    if (m_readClient.connected() || m_readClient.attemptingConnection() || m_writeClient.connected() || m_writeClient.attemptingConnection()) {
+        m_readClient.disconnectFromServer();
+        m_writeClient.disconnectFromServer();
+    } else {
+        m_readClient.connectToServer();
+    }
 }
 
 const QString &KijangClientController::address() const
@@ -54,21 +67,9 @@ void KijangClientController::setReadPort(quint16 newPort)
 {
     if (m_readPort != newPort) {
         m_readPort = newPort;
+        m_readClient.setPort(newPort);
         emit readPortChanged();
     }
-}
-
-const QString &KijangClientController::buttonString() const
-{
-    return m_buttonString;
-}
-
-void KijangClientController::setButtonString(const QString &newButtonString)
-{
-    if (m_buttonString == newButtonString)
-        return;
-    m_buttonString = newButtonString;
-    emit buttonStringChanged();
 }
 
 const QString &KijangClientController::serverNameString() const
@@ -122,11 +123,11 @@ void KijangClientController::addModule(KijangClientModule *module)
         qWarning(clientController) << "Attempt to add module" << moduleID << "but another module with the same ID already exists";
         return;
     }
-    connect(module, &KijangClientModule::sendRequest, this, &KijangClientController::sendRequest);
-    connect(module, &KijangClientModule::sendLocalRequest, this, &KijangClientController::sendLocalRequest);
-    connect(module, &KijangClientModule::checkModulePresent, this, &KijangClientController::checkModulePresent);
-    connect(module, &KijangClientModule::checkCodePresent, this, &KijangClientController::checkCodePresent);
-    connect(module, &KijangClientModule::requestAuth, this, &KijangClientController::requestAuth);
+    connect(dynamic_cast<QObject*>(module), SIGNAL(sendRequest(KijangProtocol)), this, SLOT(sendRequest(KijangProtocol)));
+    connect(dynamic_cast<QObject*>(module), SIGNAL(sendLocalRequest(quint16,quint16,KijangProtocol)), this, SLOT(sendLocalRequest(quint16,quint16,KijangProtocol)));
+    connect(dynamic_cast<QObject*>(module), SIGNAL(checkModulePresent(quint16,quint16)), this, SLOT(checkModulePresent(quint16,quint16)));
+    connect(dynamic_cast<QObject*>(module), SIGNAL(checkCodePresent(quint16,quint16,quint16)), this, SLOT(checkCodePresent(quint16,quint16,quint16)));
+    connect(dynamic_cast<QObject*>(module), SIGNAL(requestAuth(quint16,quint16,quint16,quint16,QByteArray,QString)), this, SLOT(requestAuth(quint16,quint16,quint16,quint16,QByteArray,QString)));
     moduleMap.insert(moduleID, module);
     qInfo(clientController) << "Module" << moduleID << "(" << module->description() << ")added";
 }
@@ -142,11 +143,11 @@ void KijangClientController::removeModule(quint16 moduleID)
         return;
     }
     KijangClientModule *module = moduleMap.value(moduleID);
-    disconnect(module, &KijangClientModule::sendRequest, this, &KijangClientController::sendRequest);
-    disconnect(module, &KijangClientModule::sendLocalRequest, this, &KijangClientController::sendLocalRequest);
-    disconnect(module, &KijangClientModule::checkModulePresent, this, &KijangClientController::checkModulePresent);
-    disconnect(module, &KijangClientModule::checkCodePresent, this, &KijangClientController::checkCodePresent);
-    disconnect(module, &KijangClientModule::requestAuth, this, &KijangClientController::requestAuth);
+    disconnect(dynamic_cast<QObject*>(module), SIGNAL(sendRequest(KijangProtocol)), this, SLOT(sendRequest(KijangProtocol)));
+    disconnect(dynamic_cast<QObject*>(module), SIGNAL(sendLocalRequest(quint16,quint16,KijangProtocol)), this, SLOT(sendLocalRequest(quint16,quint16,KijangProtocol)));
+    disconnect(dynamic_cast<QObject*>(module), SIGNAL(checkModulePresent(quint16,quint16)), this, SLOT(checkModulePresent(quint16,quint16)));
+    disconnect(dynamic_cast<QObject*>(module), SIGNAL(checkCodePresent(quint16,quint16,quint16)), this, SLOT(checkCodePresent(quint16,quint16,quint16)));
+    disconnect(dynamic_cast<QObject*>(module), SIGNAL(requestAuth(quint16,quint16,quint16,quint16,QByteArray,QString)), this, SLOT(requestAuth(quint16,quint16,quint16,quint16,QByteArray,QString)));
     delete module;
     moduleMap.remove(moduleID);
     qInfo(clientController) << "Module" << moduleID << "removed";
@@ -172,6 +173,8 @@ void KijangClientController::clientIDReceived(quint32 id)
     for (KijangClientModule *module : moduleMap) {
         module->setClientID(id);
     }
+    m_writeClient.setClientID(m_clientID);
+    m_writeClient.connectToServer();
 }
 
 void KijangClientController::serverNameReceived(QString name)
@@ -192,11 +195,26 @@ void KijangClientController::serverVersionReceived(QString version)
 
 void KijangClientController::serverRequestDisconnect()
 {
-    // TODO: Disconnect from server
+    m_readClient.disconnectFromServer();
+    m_writeClient.disconnectFromServer();
+}
+
+void KijangClientController::responseReceived(KijangProtocol res)
+{
+    quint16 module = res.module();
+    if (!moduleMap.contains(module)) {
+        qWarning(clientController) << "Module" << module << "returned from server but no module present is capable of handling it";
+        return;
+    }
+    moduleMap.value(module)->handleResponse(res);
 }
 
 void KijangClientController::sendRequest(KijangProtocol request)
 {
+    if (!m_readClient.connected()) {
+        qWarning(clientController) << "Request unsent as client is not connected to server";
+        return;
+    }
     m_writeClient.sendRequest(request);
 }
 
@@ -250,7 +268,7 @@ void KijangClientController::requestAuth(quint16 src, quint16 module, quint16 co
     bool ok;
     QWidget passwordPopup;
     QString message = QString("Module %1 (code %2) requires password authentication for %3 (code %4)")
-            .arg(currentModule->description(), QString::number(src, 16), authReason, QString::number(code, 16)); // TODO: Complete
+            .arg(currentModule->description(), QString::number(src, 16), authReason, QString::number(code, 16));
     QString password = QInputDialog::getText(&passwordPopup, "Password Required", message, QLineEdit::Password, QString(), &ok);
     if (!ok || password.length() == 0) {
         currentModule->authFail(KijangClientModule::CANCELLED, module, code, authMethod, authDetails);
@@ -375,4 +393,50 @@ void KijangClientController::requestAuth(quint16 src, quint16 module, quint16 co
         break;
     }
     }
+}
+
+void KijangClientController::readConnectedChanged()
+{
+    if (m_readClient.connected()) {
+        setInputsLocked(true);
+    } else {
+        m_writeClient.disconnectFromServer();
+        setShowConnected(false);
+        setInputsLocked(false);
+    }
+}
+
+void KijangClientController::writeConnectedChanged()
+{
+    if (m_writeClient.connected()) {
+        setInputsLocked(true);
+        setShowConnected(true);
+    } else {
+        m_readClient.disconnectFromServer();
+        setShowConnected(false);
+        setInputsLocked(false);
+    }
+}
+
+void KijangClientController::attemptingConnectionChanged()
+{
+    setInputsLocked(m_readClient.connected() || m_readClient.attemptingConnection() || m_writeClient.connected() || m_writeClient.attemptingConnection());
+    setLockConnectButton(m_readClient.attemptingConnection() || m_writeClient.attemptingConnection());
+}
+
+void KijangClientController::writeDataReceived(quint16 writePort, quint32 clientID)
+{
+    setWritePort(writePort);
+    clientIDReceived(clientID);
+}
+
+quint16 KijangClientController::writePort() const
+{
+    return m_writePort;
+}
+
+void KijangClientController::setWritePort(quint16 newWritePort)
+{
+    m_writePort = newWritePort;
+    m_writeClient.setPort(newWritePort);
 }

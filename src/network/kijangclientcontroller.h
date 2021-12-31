@@ -18,7 +18,6 @@ class KijangClientController : public QObject
     Q_OBJECT
     Q_PROPERTY(QString address READ address WRITE setAddress NOTIFY addressChanged)
     Q_PROPERTY(quint16 readPort READ readPort WRITE setReadPort NOTIFY readPortChanged)
-    Q_PROPERTY(QString buttonString READ buttonString WRITE setButtonString NOTIFY buttonStringChanged)
     Q_PROPERTY(bool inputsLocked READ inputsLocked WRITE setInputsLocked NOTIFY inputsLockedChanged)
     Q_PROPERTY(bool showConnected READ showConnected WRITE setShowConnected NOTIFY showConnectedChanged)
     Q_PROPERTY(bool lockConnectButton READ lockConnectButton WRITE setLockConnectButton NOTIFY lockConnectButtonChanged)
@@ -32,8 +31,9 @@ public:
     void setAddress(const QString &newAddress);
     quint16 readPort() const;
     void setReadPort(quint16 newPort);
-    const QString &buttonString() const;
-    void setButtonString(const QString &newButtonString);
+    quint16 writePort() const;
+    void setWritePort(quint16 newWritePort);
+
     bool inputsLocked() const;
     void setInputsLocked(bool newInputsLocked);
     bool showConnected() const;
@@ -54,16 +54,22 @@ public slots:
     void serverRequestDisconnect();
 
     // Client module slots
+    void responseReceived(KijangProtocol res);
     void sendRequest(KijangProtocol request);
     void sendLocalRequest(quint16 src, quint16 target, KijangProtocol req);
     void checkModulePresent(quint16 src, quint16 module);
     void checkCodePresent(quint16 src, quint16 module, quint16 code);
     void requestAuth(quint16 src, quint16 module, quint16 code, quint16 authMethod, QByteArray authDetails, QString authReason);
 
+    // Read and write client slots
+    void readConnectedChanged();
+    void writeConnectedChanged();
+    void attemptingConnectionChanged();
+    void writeDataReceived(quint16 writePort, quint32 clientID);
+
 signals:
     void addressChanged();
     void readPortChanged();
-    void buttonStringChanged();
     void inputsLockedChanged();
     void showConnectedChanged();
     void lockConnectButtonChanged();
@@ -73,9 +79,8 @@ private:
     KijangReadClient m_readClient;
     KijangWriteClient m_writeClient;
     QString m_address;
-    QString m_buttonString;
     quint16 m_readPort;
-    quint16 m_writePort; // Only accessed from within class, no need getter and setter
+    quint16 m_writePort; // Only accessed from within class
     quint32 m_clientID;
     bool m_inputsLocked;
     bool m_showConnected; // For the 'Connect' / 'Disconnect' button

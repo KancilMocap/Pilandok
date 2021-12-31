@@ -16,8 +16,23 @@ public:
     explicit KijangClient(QObject *parent = nullptr);
     ~KijangClient();
     void setPort(quint16 newPort);
+    void connectToServer();
+    void disconnectFromServer();
+    virtual void onConnected() = 0;
+
+    bool connected() const;
+    bool attemptingConnection() const;
+
+signals:
+    void connectedChanged(bool newConnected);
+    void attemptingConnectionChanged(bool newAttemptingConnection);
 
 protected:
+    void setConnected(bool newConnected);
+    void setAttemptingConnection(bool newAttemptingConnection);
+
+    bool m_connected;
+    bool m_attemptingConnection;
     bool internalConnectionSet;
     bool readyRead;
     QString m_errorString;
@@ -25,16 +40,10 @@ protected:
     quint16 m_port;
     QTcpSocket socket;
 
-signals:
-    void connectedChanged();
-    void attemptingConnectionChanged();
-
 protected slots:
     void clientConnected();
     void clientDisconnected();
-    void clientError(QAbstractSocket::SocketError socketError);
     void clientStateChanged(QAbstractSocket::SocketState socketState);
-    void clientReadyRead();
 
 };
 
